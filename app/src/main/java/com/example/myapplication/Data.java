@@ -43,7 +43,13 @@ public class Data implements Runnable {
         try (Response response = client.newCall(request).execute()) {
             String ans = response.body().string();
             JSONArray jsonArr = new JSONArray(ans);
-            RollArray rollArray = new RollArray();
+            RollArray rollArray;
+            if (rollArrays.isEmpty())
+                rollArray = new RollArray();
+            else
+                rollArray = rollArrays.get(
+                        rollArrays.size()-1);
+
             for (int i = 0; i < jsonArr.length(); ++i) {
                 JSONObject obj = jsonArr.getJSONObject(i);
                 if (rollArray.isEmpty())
@@ -52,6 +58,9 @@ public class Data implements Runnable {
                     rollArray.calcAvg();
                     rollArrays.add(rollArray);
                     rollArray = new RollArray(obj.getString("date_beg_born"));
+                }
+                else if (rollArray.getRollInd(rollArray.size()-1).id == obj.getInt("id")){
+                    continue;
                 }
                 rollArray.addRoll(new Roll(
                         obj.getString("attr_id"),
@@ -64,15 +73,14 @@ public class Data implements Runnable {
                         obj.getString("title"),
                         obj.getString("vavg")));
             }
+            if (!rollArray.isEmpty()) {
+                rollArray.calcAvg();
+                rollArrays.add(rollArray);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    class MyTimerTask extends TimerTask {
-        @Override
-        public void run() {
 
-        }
-    }
 }
