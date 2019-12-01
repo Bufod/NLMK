@@ -46,4 +46,9 @@ public class RollArray {
     public int size(){
         return rolls.size();
     }
+    public void clear(){
+        rolls.clear();
+        avg = 0;
+        date_beg_born = "";
+    }
 }

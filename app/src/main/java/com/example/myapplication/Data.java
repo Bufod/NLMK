@@ -18,12 +18,14 @@ public class Data implements Runnable {
     Thread t;
     TextView tw;
     String url;
-    ArrayList<RollArray> rollArrays;
+//    ArrayList<RollArray> rollArrays;
+    RollArray rollArrays;
     Data(String url) {
         t = new Thread(this);
 //        this.tw = tw;
         this.url = url;
-        this.rollArrays = new ArrayList<>();
+//        this.rollArrays = new ArrayList<>();
+        this.rollArrays = new RollArray();
     }
 
     @Override
@@ -43,26 +45,26 @@ public class Data implements Runnable {
         try (Response response = client.newCall(request).execute()) {
             String ans = response.body().string();
             JSONArray jsonArr = new JSONArray(ans);
-            RollArray rollArray;
-            if (rollArrays.isEmpty())
-                rollArray = new RollArray();
-            else
-                rollArray = rollArrays.get(
-                        rollArrays.size()-1);
-
-            for (int i = 0; i < jsonArr.length(); ++i) {
+//            RollArray rollArray = new RollArray();
+//            if (rollArrays.isEmpty())
+//                rollArray = new RollArray();
+//            else
+//                rollArray = rollArrays.get(
+//                        rollArrays.size()-1);
+            rollArrays.clear();
+            for (int i = jsonArr.length()-1; i > 0 ; i--) {
                 JSONObject obj = jsonArr.getJSONObject(i);
-                if (rollArray.isEmpty())
-                    rollArray.setDate_beg_born(obj.getString("date_beg_born"));
-                else if (!rollArray.getDate_beg_born().equals(obj.getString("date_beg_born"))) {
-                    rollArray.calcAvg();
-                    rollArrays.add(rollArray);
-                    rollArray = new RollArray(obj.getString("date_beg_born"));
-                }
-                else if (rollArray.getRollInd(rollArray.size()-1).id == obj.getInt("id")){
-                    continue;
-                }
-                rollArray.addRoll(new Roll(
+//                if (rollArray.isEmpty())
+//                    rollArray.setDate_beg_born(obj.getString("date_beg_born"));
+//                else if (!rollArray.getDate_beg_born().equals(obj.getString("date_beg_born"))) {
+//                    rollArray.calcAvg();
+//                    rollArrays.add(rollArray);
+//                    rollArray = new RollArray(obj.getString("date_beg_born"));
+//                }
+//                else if (rollArray.getRollInd(rollArray.size()-1).id == obj.getInt("id")){
+//                    continue;
+//                }
+                rollArrays.addRoll(new Roll(
                         obj.getString("attr_id"),
                         obj.getString("date_beg_born"),
                         obj.getString("e_born_unit"),
@@ -73,10 +75,10 @@ public class Data implements Runnable {
                         obj.getString("title"),
                         obj.getString("vavg")));
             }
-            if (!rollArray.isEmpty()) {
-                rollArray.calcAvg();
-                rollArrays.add(rollArray);
-            }
+//            if (!rollArray.isEmpty()) {
+//                rollArray.calcAvg();
+//                rollArrays.add(rollArray);
+//            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

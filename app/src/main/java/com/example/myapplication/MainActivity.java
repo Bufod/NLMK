@@ -48,33 +48,39 @@ public class MainActivity extends AppCompatActivity {
         data = new Data(url);
         timer = new Timer();
         myTimerTask  = new MyTimerTask();
-        timer.schedule(myTimerTask, 1000, 1000);
+        timer.schedule(myTimerTask, 0, 1000);
     }
     private void drawLineChart(Data data){
+        chart.clear();
         Description description = new Description();
         description.setText("Динамика");
         chart.setDescription(description);
         ArrayList<Entry>  yData = new ArrayList<>();
         for(int i = 0; i < data.rollArrays.size(); i++){
-            yData.add(new Entry(i, (float)data.rollArrays.get(i).getAvg()));
+//            yData.add(new Entry(i, (float)data.rollArrays.get(i).getAvg()));
+            yData.add(new Entry(i, (float)data.rollArrays.getRollInd(i).vavg));
         }
 
         ArrayList<String> xData = new ArrayList<>();
         for(int i = 0; i < data.rollArrays.size(); i++){
-            xData.add(data.rollArrays.get(i).getDate_beg_born());
+//            xData.add(data.rollArrays.get(i).getDate_beg_born());
+            xData.add(String.valueOf(data.rollArrays.getRollInd(i).id));
         }
 
         LineDataSet lineDataSet = new LineDataSet(yData, "Ср.Скорость");
-        lineDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+        lineDataSet.setColor(Color.argb(225, 233, 137, 11));
+        lineDataSet.setLineWidth(3);
 
         LineData lineData = new LineData(lineDataSet);
         lineData.setValueTextSize(13f);
         lineData.setValueTextColor(Color.BLACK);
-
+        lineData.setDrawValues(false);
         chart.setData(lineData);
         XAxis x = chart.getXAxis();
-//        x.setValueFormatter(new IndexAxisValueFormatter(xData));
+        x.setValueFormatter(new IndexAxisValueFormatter(xData));
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setLabelCount(100);
+        x.setLabelRotationAngle(-80);
         chart.invalidate();
     }
     class MyTimerTask extends TimerTask {
@@ -86,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            for(int i = 0; i < data.rollArrays.size(); i++)
+//                System.out.println(data.rollArrays.get(i).size() + " " + data.rollArrays.get(i).getAvg());
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
