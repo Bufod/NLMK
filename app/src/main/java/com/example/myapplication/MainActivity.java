@@ -1,5 +1,10 @@
 package com.example.myapplication;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -34,16 +39,18 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-
     LineChart chart;
     Data data;
     public String url = "http://13.69.157.123/get-last-data";
     Timer timer;
     MyTimerTask myTimerTask;
+    private NotificationManager nm;
+    private final int NOTIFICATION_ID = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        nm = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
         chart = (LineChart) findViewById(R.id.Chart);
         data = new Data(url);
         timer = new Timer();
@@ -55,10 +62,15 @@ public class MainActivity extends AppCompatActivity {
         Description description = new Description();
         description.setText("Динамика");
         chart.setDescription(description);
-        ArrayList<Entry>  yData = new ArrayList<>();
+        ArrayList<Entry>  yDataNorm = new ArrayList<>();
+        ArrayList<Entry>  yDataWar = new ArrayList<>();
         for(int i = 0; i < data.rollArrays.size(); i++){
 //            yData.add(new Entry(i, (float)data.rollArrays.get(i).getAvg()));
-            yData.add(new Entry(i, (float)data.rollArrays.getRollInd(i).vavg));
+            float vavg = (float)data.rollArrays.getRollInd(i).vavg;
+            if(vavg < 123)
+                yDataWar.add(new Entry(i, vavg));
+            else
+                yDataNorm.add(new Entry(i, vavg));
         }
 
         ArrayList<String> xData = new ArrayList<>();
@@ -67,11 +79,17 @@ public class MainActivity extends AppCompatActivity {
             xData.add(String.valueOf(data.rollArrays.getRollInd(i).id));
         }
 
-        LineDataSet lineDataSet = new LineDataSet(yData, "Ср.Скорость");
-        lineDataSet.setColor(Color.argb(225, 233, 137, 11));
-        lineDataSet.setLineWidth(3);
+        LineDataSet lineDataSet1 = new LineDataSet(yDataNorm, "Ср.Скорость");
+        lineDataSet1.setColor(Color.argb(225, 233, 137, 11));
+        lineDataSet1.setLineWidth(3);
+        lineDataSet1.setCircleColor(Color.BLACK);
+        lineDataSet1.setCircleHoleColor(Color.WHITE);
 
-        LineData lineData = new LineData(lineDataSet);
+        LineDataSet lineDataSet2 = new LineDataSet(yDataWar, "Ср.Скорость");
+        lineDataSet1.setCircleColor(Color.BLACK);
+        lineDataSet1.setCircleHoleColor(Color.WHITE);
+
+        LineData lineData = new LineData(lineDataSet1);
         lineData.setValueTextSize(13f);
         lineData.setValueTextColor(Color.BLACK);
         lineData.setDrawValues(false);
@@ -102,4 +120,20 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+//    public void showNotif(View view){
+//        Notification.Builder builder = new Notification.Builder(getApplicationContext());
+//        Intent intent = new Intent(getApplicationContext(), FinishActivity.class);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+//        builder
+//                .setContentIntent(pendingIntent)
+//                .setTicker("Критичная скорость")
+//                .setWhen(System.currentTimeMillis())
+//                .setAutoCancel(true)
+//                .setContentTitle("Уведомление")
+//                .setContentText("Скорость ниже 123");
+//
+//        Notification notification = builder.build();
+//        nm.notify(NOTIFICATION_ID, notification);
+//    }
 }
