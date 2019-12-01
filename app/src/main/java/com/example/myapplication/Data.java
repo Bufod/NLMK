@@ -7,6 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.TimerTask;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -16,11 +18,12 @@ public class Data implements Runnable {
     Thread t;
     TextView tw;
     String url;
-
-    Data(TextView tw, String url) {
+    ArrayList<RollArray> rollArrays;
+    Data(String url) {
         t = new Thread(this);
-        this.tw = tw;
+//        this.tw = tw;
         this.url = url;
+        this.rollArrays = new ArrayList<>();
     }
 
     @Override
@@ -40,12 +43,36 @@ public class Data implements Runnable {
         try (Response response = client.newCall(request).execute()) {
             String ans = response.body().string();
             JSONArray jsonArr = new JSONArray(ans);
+            RollArray rollArray = new RollArray();
             for (int i = 0; i < jsonArr.length(); ++i) {
                 JSONObject obj = jsonArr.getJSONObject(i);
-                System.out.println(obj.getString("date_beg_born"));
+                if (rollArray.isEmpty())
+                    rollArray.setDate_beg_born(obj.getString("date_beg_born"));
+                else if (!rollArray.getDate_beg_born().equals(obj.getString("date_beg_born"))) {
+                    rollArray.calcAvg();
+                    rollArrays.add(rollArray);
+                    rollArray = new RollArray(obj.getString("date_beg_born"));
+                }
+                rollArray.addRoll(new Roll(
+                        obj.getString("attr_id"),
+                        obj.getString("date_beg_born"),
+                        obj.getString("e_born_unit"),
+                        obj.getString("e_born_unit_code"),
+                        obj.getString("id"),
+                        obj.getString("m_unit_id"),
+                        obj.getString("offsets"),
+                        obj.getString("title"),
+                        obj.getString("vavg")));
             }
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+    }
+
+    class MyTimerTask extends TimerTask {
+        @Override
+        public void run() {
+
         }
     }
 }
