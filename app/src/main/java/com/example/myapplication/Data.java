@@ -79,6 +79,7 @@ public class Data implements Runnable {
 //                rollArray.calcAvg();
 //                rollArrays.add(rollArray);
 //            }
+            rollArrays.calcAvg();
         } catch (JSONException e) {
             e.printStackTrace();
         }

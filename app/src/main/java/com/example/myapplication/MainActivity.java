@@ -62,32 +62,34 @@ public class MainActivity extends AppCompatActivity {
         Description description = new Description();
         description.setText("Динамика");
         chart.setDescription(description);
-        ArrayList<Entry>  yDataNorm = new ArrayList<>();
-        ArrayList<Entry>  yDataWar = new ArrayList<>();
+        ArrayList<Entry>  yData = new ArrayList<>();
+//        ArrayList<Entry>  yDataWar = new ArrayList<>();
         for(int i = 0; i < data.rollArrays.size(); i++){
 //            yData.add(new Entry(i, (float)data.rollArrays.get(i).getAvg()));
             float vavg = (float)data.rollArrays.getRollInd(i).vavg;
-            if(vavg < 123)
-                yDataWar.add(new Entry(i, vavg));
-            else
-                yDataNorm.add(new Entry(i, vavg));
+//            if(vavg < 123)
+//                yDataWar.add(new Entry(i, vavg));
+//            else
+                yData.add(new Entry(i, vavg));
         }
 
         ArrayList<String> xData = new ArrayList<>();
         for(int i = 0; i < data.rollArrays.size(); i++){
 //            xData.add(data.rollArrays.get(i).getDate_beg_born());
             xData.add(String.valueOf(data.rollArrays.getRollInd(i).id));
+            if (data.rollArrays.getRollInd(i).vavg < 123)
+                showNotif();
         }
 
-        LineDataSet lineDataSet1 = new LineDataSet(yDataNorm, "Ср.Скорость");
+        LineDataSet lineDataSet1 = new LineDataSet(yData, "Ср.Скорость");
         lineDataSet1.setColor(Color.argb(225, 233, 137, 11));
         lineDataSet1.setLineWidth(3);
         lineDataSet1.setCircleColor(Color.BLACK);
         lineDataSet1.setCircleHoleColor(Color.WHITE);
 
-        LineDataSet lineDataSet2 = new LineDataSet(yDataWar, "Ср.Скорость");
-        lineDataSet1.setCircleColor(Color.BLACK);
-        lineDataSet1.setCircleHoleColor(Color.WHITE);
+//        LineDataSet lineDataSet2 = new LineDataSet(yDataWar, "Ср.Скорость");
+//        lineDataSet1.setCircleColor(Color.BLACK);
+//        lineDataSet1.setCircleHoleColor(Color.WHITE);
 
         LineData lineData = new LineData(lineDataSet1);
         lineData.setValueTextSize(13f);
@@ -100,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         x.setLabelCount(100);
         x.setLabelRotationAngle(-80);
         chart.invalidate();
+
     }
     class MyTimerTask extends TimerTask {
         @Override
@@ -121,19 +124,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    public void showNotif(View view){
-//        Notification.Builder builder = new Notification.Builder(getApplicationContext());
-//        Intent intent = new Intent(getApplicationContext(), FinishActivity.class);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-//        builder
-//                .setContentIntent(pendingIntent)
-//                .setTicker("Критичная скорость")
-//                .setWhen(System.currentTimeMillis())
-//                .setAutoCancel(true)
-//                .setContentTitle("Уведомление")
-//                .setContentText("Скорость ниже 123");
-//
-//        Notification notification = builder.build();
-//        nm.notify(NOTIFICATION_ID, notification);
-//    }
+    public void showNotif(){
+        Notification.Builder builder = new Notification.Builder(getApplicationContext());
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        builder
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setTicker("Критичная скорость")
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(true)
+                .setContentTitle("Уведомление")
+                .setContentText("Скорость ниже 123");
+
+        Notification notification = builder.build();
+        nm.notify(NOTIFICATION_ID, notification);
+    }
 }
