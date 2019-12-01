@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     MyTimerTask myTimerTask;
     private NotificationManager nm;
     private final int NOTIFICATION_ID = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,29 +55,30 @@ public class MainActivity extends AppCompatActivity {
         chart = (LineChart) findViewById(R.id.Chart);
         data = new Data(url);
         timer = new Timer();
-        myTimerTask  = new MyTimerTask();
+        myTimerTask = new MyTimerTask();
         timer.schedule(myTimerTask, 0, 1000);
     }
-    private void drawLineChart(Data data){
+
+    private void drawLineChart(Data data) {
         chart.clear();
         Description description = new Description();
         description.setText("Динамика");
         chart.setDescription(description);
-        ArrayList<Entry>  yData = new ArrayList<>();
-//        ArrayList<Entry>  yDataWar = new ArrayList<>();
-        for(int i = 0; i < data.rollArrays.size(); i++){
-//            yData.add(new Entry(i, (float)data.rollArrays.get(i).getAvg()));
-            float vavg = (float)data.rollArrays.getRollInd(i).vavg;
+        ArrayList<Entry> yData = new ArrayList<>();
+        ArrayList<String> xData = new ArrayList<>();
+        for (int i = 0; i < data.rollArrays.size(); i++) {
+            float vavg = (float) data.rollArrays.getRollInd(i).vavg;
 //            if(vavg < 123)
 //                yDataWar.add(new Entry(i, vavg));
 //            else
-                yData.add(new Entry(i, vavg));
+            yData.add(new Entry(i, vavg));
         }
 
-        ArrayList<String> xData = new ArrayList<>();
-        for(int i = 0; i < data.rollArrays.size(); i++){
+
+        for (int i = 0; i < data.rollArrays.size(); i++) {
 //            xData.add(data.rollArrays.get(i).getDate_beg_born());
             xData.add(String.valueOf(data.rollArrays.getRollInd(i).id));
+            // error out of bounds
             if (data.rollArrays.getRollInd(i).vavg < 123)
                 showNotif();
         }
@@ -104,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         chart.invalidate();
 
     }
+
     class MyTimerTask extends TimerTask {
         @Override
         public void run() {
@@ -113,21 +116,21 @@ public class MainActivity extends AppCompatActivity {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            for(int i = 0; i < data.rollArrays.size(); i++)
+            for (int i = 0; i < data.rollArrays.size(); i++)
 //                System.out.println(data.rollArrays.get(i).size() + " " + data.rollArrays.get(i).getAvg());
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    drawLineChart(data);
-                }
-            });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        drawLineChart(data);
+                    }
+                });
         }
     }
 
-    public void showNotif(){
+    public void showNotif() {
         Notification.Builder builder = new Notification.Builder(getApplicationContext());
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         builder
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
